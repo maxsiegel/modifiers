@@ -33,16 +33,11 @@ for i in range(len(dataframes)):
 
 politeness = pd.concat([dataframes[0], dataframes[1]])
 dialogue = pd.concat([dataframes[2], dataframes[3]])
-politeness.groupby(['intensifier', 'predicate']).agg({
-    'difference':
-    'mean',
-    'Z-Score Difference':
-    'mean'
-}).reset_index()
+politeness = politeness.groupby(['intensifier','predicate']).agg({'difference': 'mean', 'Z-Score Difference':'mean'}).reset_index()
 # create key with intensifier and predicate as a tuple and value as Z-Score Difference
 # compute U_soc
-U_soc = politeness.set_index(['intensifier',
-                              'predicate'])['Z-Score Difference'].to_dict()
+U_soc = politeness.set_index(['intensifier', 'predicate'])['Z-Score Difference'].to_dict()
+
 # compute dialogue
 utterences = list(U_soc.keys())
 predicates = list(set(w[1] for w in utterences))

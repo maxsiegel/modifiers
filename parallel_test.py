@@ -1,4 +1,5 @@
 import cfut
+import pickle
 from multiprocessing import Pool, Manager 
 from itertools import product, islice
 import numpy as np
@@ -145,7 +146,6 @@ def main():
     # with cfut.SlurmExecutor(keep_logs=True) as executor:
     with cfut.SlurmExecutor() as executor:
         results = executor.map(func_to_iterate_over, parameter_blocks)
-    import pickle
     with open('results.pkl', 'wb') as f:
         pickle.dump(results, f)
     import sys

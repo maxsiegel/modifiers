@@ -118,7 +118,7 @@ def main():
             json.dump(param, tmp_file)
             data_file_path = tmp_file.name
 
-            job = slurmpy.Slurm(str(n), {"time": "2:00:00"})
+            job = slurmpy.Slurm(str(n), {"time": "02:00:00", "partition": "normal"})
             results = job.run(f"python func_to_iterate_over.py --data-file {data_file_path}")
             print(results)
 

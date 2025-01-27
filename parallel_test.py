@@ -138,18 +138,23 @@ def func_to_iterate_over(args):
 
 
 def main():
-    block_size = 50
+    block_size = 1000
     # results = p.starmap(func_to_iterate_over, list(product(theta_to_test, repeat=5)))
-    parameter_blocks = list(chunked(product(theta_to_test, repeat=5), block_size))[:100]
+    parameter_blocks = list(chunked(product(theta_to_test, repeat=5), block_size))
     # manager = Manager()
     # shared_array = manager.list(theta_to_test)
     # func_to_iterate_over([(i, shared_array) for i in range(len(theta_to_test))][0])
     # with Pool(10) as p:
         # # results = p.map(func_to_iterate_over, [(i, shared_array) for i in range(len(theta_to_test))])
         # results = p.map(func_to_iterate_over, parameter_blocks)
+    # with cfut.SlurmExecutor(keep_logs=True) as executor:
     with cfut.SlurmExecutor() as executor:
         results = executor.map(func_to_iterate_over, parameter_blocks)
-
+    import pickle
+    with open('results.pkl', 'wb') as f:
+        pickle.dump(results, f)
+    import sys
+    sys.exit()
     best_thetas = np.zeros((len(possible_phi), len(possible_alpha)), dtype=object)
     # for i in range(len(possible_phi)):
     #     for j in range(len(possible_alpha)):

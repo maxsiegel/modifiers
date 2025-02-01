@@ -187,28 +187,23 @@ def L(w, s,t0,t1,t2,t3,t4,t5):  # literal likelihood L(w | s)
     ])
     return np.tile(intensifier_semantics, (7, 1))[w, s]
 @memo
-def L1[s: S, w: W](inf_term, soc_term, cost,thetas):
+def L1[s: S, w: W](inf_term, soc_term, cost,t0,t1,t2,t3,t4,t5):
     listener: thinks[
         speaker: given(s in S, wpp=state_prior(s)),
-        speaker: thinks[
-            listener: thinks[
-                speaker: given(s in S, wpp=state_prior(s)),
-                speaker: chooses(w in W, wpp=L(w, s,thetas[0],thetas[1],thetas[2],thetas[3],thetas[4],thetas[5]))
-            ]
-        ],
-        speaker: chooses(w in W, wpp=exp( imagine[
-            listener: observes [speaker.w] is w,
-            listener: knows(s),
-            (
-                inf_term * listener[ log(Pr[speaker.s == s]) ] +  # U_inf = listener's surprisal
+        speaker: chooses(w in W, wpp=
+            imagine[
+                listener: knows(w),
+                listener: chooses(s in S, wpp=L(w, s,t0,t1,t2,t3,t4,t5)) ,
+                exp(inf_term * log(Pr[listener.s == s]) +
                 soc_term * U_soc(w) - # U_soc = listener's EU
-                cost*is_costly(w)  # cost of utterance
-            )
-        ]))
+                cost*is_costly(w)) # U_inf = listener's surprisal
+            ]
+        )
     ]
     listener: observes[speaker.w] is w
     listener: chooses(s in S, wpp=Pr[speaker.s == s])
     return Pr[listener.s == s]
+
 
 
 
@@ -240,12 +235,19 @@ measured_values = np.array(measured_values)
 # Function to compute log-loss
 @jax.jit
 def compute_logloss(params):
-    thetas = params[:6]
+    t0, t1, t2, t3, t4, t5 = params[:6]
+    t0 = np.int64(t0)
+    t1 = np.int64(t1)
+    t2 = np.int64(t2)
+    t3 = np.int64(t3)
+    t4 = np.int64(t4)
+    t5 = np.int64(t5)
     cost = params[6]
     inf_term = params[7]
     soc_term = params[8]
-    P_l1 = L1(inf_term=inf_term, soc_term=soc_term, cost=cost, thetas=thetas)  # P(s|w)
-    return np.sum(np.log(P_l1) * measured_values.T)
+    # compute fit e.g. log_likelihood
+    P_l1 = L1(inf_term, soc_term, cost, t0, t1, t2, t3, t4, t5) # note this should be P(s|w)
+    return np.sum(np.log(P_l1)*measured_values.T)
 
 
 
@@ -317,6 +319,7 @@ for i in tqdm(range(0, param_grid.shape[0], batch_size), desc="Processing Batche
 
     batch = batch.reshape(num_devices, -1, batch.shape[1])  # Reshape for `pmap`
 
+    print(batch)
     output = compute_parallel(batch)
     all_output.append(jax.device_get(output).flatten())  # Free memory early
 

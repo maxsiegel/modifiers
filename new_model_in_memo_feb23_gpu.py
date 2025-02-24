@@ -4,6 +4,7 @@
 # In[1]:
 import numpy
 import os
+from os.path import join
 
 
 import pandas as pd
@@ -381,6 +382,13 @@ def batch_compute(func, *params, batch_size=BATCH_SIZE):
     if results_tuple is not None:
         return tuple(np.concatenate(res) for res in results_tuple)
     return np.concatenate(results)
+
+
+if not os.path.exists('UK_specific_soc_feb21') and not os.path.exists('US_standard_feb21'):
+    os.mkdir('UK_US_standard')
+    os.mkdir('US_specific')
+    os.mkdir('UK_specific')
+
 """
 # Compute UK-specific results in batches
 for t1 in theta_to_test:
@@ -396,6 +404,8 @@ for t1 in theta_to_test:
         del all_output
 
 # Compute US-specific results in batches
+"""
+
 for t1 in theta_to_test:
     for t2 in theta_to_test:
         all_output = []
@@ -405,9 +415,9 @@ for t1 in theta_to_test:
                 output = numpy.array(jax.device_get(output))
                 all_output.append(output)
             print(t1, t2, t3)
-        np.save(f'US_specific_soc_feb21_{t1}.npy', numpy.array(all_output).flatten())
+        np.save(join('US_specific', f'US_specific_soc_feb21_{t1}_{t2}.npy'), numpy.array(all_output).flatten())
         del all_output
-"""
+
 # Compute standard UK/US results in batches
 for t1 in theta_to_test:
     for t2 in theta_to_test:
@@ -421,7 +431,7 @@ for t1 in theta_to_test:
                 UK_all_output.append(UK_output)
                 US_all_output.append(US_output)
             print(t1, t2, t3)
-        np.save(f'UK_standard_feb21_{t1}.npy', numpy.array(UK_all_output).flatten())
+        np.save(join('UK_US_standard', f'UK_standard_feb21_{t1}_{t2}.npy'), numpy.array(UK_all_output).flatten())
         del UK_all_output
-        np.save(f'US_standard_feb21_{t1}.npy', numpy.array(US_all_output).flatten())
+        np.save(join('UK_US_standard', f'US_standard_feb21_{t1}_{t2}.npy'), numpy.array(US_all_output).flatten())
         del US_all_output

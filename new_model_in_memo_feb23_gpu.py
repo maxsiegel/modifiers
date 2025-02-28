@@ -384,10 +384,12 @@ def batch_compute(func, *params, batch_size=BATCH_SIZE):
     return np.concatenate(results)
 
 
-if not os.path.exists('UK_specific_soc_feb21') and not os.path.exists('US_standard_feb21'):
+try:
     os.mkdir('UK_US_standard')
     os.mkdir('US_specific')
     os.mkdir('UK_specific')
+except:
+    pass
 
 """
 # Compute UK-specific results in batches
@@ -406,6 +408,7 @@ for t1 in theta_to_test:
 # Compute US-specific results in batches
 """
 
+"""
 for t1 in theta_to_test:
     for t2 in theta_to_test:
         all_output = []
@@ -418,6 +421,7 @@ for t1 in theta_to_test:
         np.save(join('US_specific', f'US_specific_soc_feb21_{t1}_{t2}.npy'), numpy.array(all_output).flatten())
         del all_output
 
+"""
 # Compute standard UK/US results in batches
 for t1 in theta_to_test:
     for t2 in theta_to_test:
